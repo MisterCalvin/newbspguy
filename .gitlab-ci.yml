@@ -1,0 +1,68 @@
+stages:
+  - build
+
+variables:
+  BUILD_CONFIG: "Release"
+  SOLUTION_FILE: "vs-project/bspguy.sln"
+
+build-newbspguy:
+  stage: build
+  tags:
+    - msvc-2022-x86
+  image: cr.gitlab.sbotnas.io/kevin/msvc-2022-windows-docker/msvc-2022:latest
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]|\[ci skip\]|\[skip-ci\]|\[no ci\]/'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+  before_script:
+    - cd $CI_PROJECT_DIR
+    - |
+      if ($env:CI_COMMIT_MESSAGE -match '\[debug\]') {
+        $env:BUILD_CONFIG = "Debug"
+        Write-Host "🐛 Debug build requested via commit message"
+      } else {
+        $env:BUILD_CONFIG = "Release"
+        Write-Host "🚀 Release build (default)"
+      }
+      Write-Host "Building configuration: $env:BUILD_CONFIG"
+  script:
+    # Set up Visual Studio environment for x64
+    - '& "C:\VcVars.ps1" x64'
+    # Build the solution
+    - |
+      Write-Host "🔨 Building $env:SOLUTION_FILE..."
+      msbuild $env:SOLUTION_FILE /p:Configuration=$env:BUILD_CONFIG /p:Platform=x64 /m
+    # Check build outputs
+    - |
+      Write-Host "🔍 Checking build outputs..."
+      if (Test-Path "vs-project/$env:BUILD_CONFIG") {
+          Write-Host "Build output files:"
+          Get-ChildItem "vs-project/$env:BUILD_CONFIG" -File | ForEach-Object { Write-Host "  $($_.Name)" }
+      }
+    # Create artifact structure
+    - |
+      Write-Host "📦 Creating artifact structure..."
+      New-Item -ItemType Directory -Force -Path "build"
+      
+      $exePath = "vs-project/$env:BUILD_CONFIG/bspguy.exe"
+      if (Test-Path $exePath) {
+        Copy-Item $exePath "build/bspguy.exe"
+        Write-Host "✅ Copied bspguy.exe"
+      } else {
+        Write-Error "❌ bspguy.exe not found at $exePath"
+        exit 1
+      }
+      
+      # Copy resources if they exist
+      if (Test-Path "resources") {
+        Copy-Item "resources/*" "build/" -Recurse -Force
+        Write-Host "✅ Copied resources"
+      }
+      
+      Write-Host "🎉 newbspguy build complete"
+  artifacts:
+    name: "newbspguy-$BUILD_CONFIG-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - build/
+    expire_in: 7 days
