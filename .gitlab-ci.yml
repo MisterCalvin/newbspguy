@@ -9,7 +9,7 @@ build-newbspguy:
   stage: build
   tags:
     - msvc-2022-x86
-  image: cr.gitlab.sbotnas.io/kevin/msvc-2022-windows-docker/msvc-2022:latest
+  image: cr.gitlab.sbotnas.io/kevin/msvc-2022-windows-docker:latest
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]|\[ci skip\]|\[skip-ci\]|\[no ci\]/'
       when: never
