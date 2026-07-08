@@ -3254,7 +3254,14 @@ void BspRenderer::drawPointEntities(std::vector<int> highlightEnts, int pass)
 		if (mapEnt->hide)
 			continue;
 
-		if (ortho_overview || make_screenshot)
+		if (ortho_overview)
+		{
+			if (!ortho_render_studio_models || !renderEnts[i].mdl || !renderEnts[i].mdl->hasRenderableMeshes())
+			{
+				continue;
+			}
+		}
+		else if (make_screenshot)
 		{
 			if (!starts_with(mapEnt->classname, "cycler_") &&
 				!starts_with(mapEnt->classname, "func_"))

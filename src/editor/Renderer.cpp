@@ -41,6 +41,7 @@ int ortho_tga_w = 1024;
 int ortho_tga_h = 768;
 bool ortho_save_tga = false;
 bool ortho_save_bmp = false;
+bool ortho_render_studio_models = false;
 
 // for screenmaker cmd
 int make_screenshot = 0;

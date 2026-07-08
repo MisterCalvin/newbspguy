@@ -7184,6 +7184,7 @@ void Gui::drawOverviewWidget()
 				*/
 		ImGui::SeparatorText("Overview Settings");
 		ImGui::Checkbox("Show Overview", &orthoMode);
+		ImGui::Checkbox("Render Studio Models", &ortho_render_studio_models);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
 		ImGui::DragFloat("Aspect Ratio", &ortho_custom_aspect, 0.01f, 0.5f, 2.0f, "%.2f");
 		ImGui::DragFloat("Ortho FOV", &ortho_fov, 0.1f, 0.01f, 200.0f, "%.2f");
