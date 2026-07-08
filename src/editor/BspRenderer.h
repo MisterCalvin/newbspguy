@@ -91,10 +91,12 @@ struct RenderGroup
 	VertexBuffer* buffer;
 	bool transparent;
 	bool special;
+	bool hiddenInOverview;
 	RenderGroup()
 	{
 		buffer = NULL;
 		transparent = special = false;
+		hiddenInOverview = false;
 		textures.clear();
 		frameid = 0;
 		frametime = 0.0f;

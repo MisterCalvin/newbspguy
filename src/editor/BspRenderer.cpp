@@ -992,6 +992,7 @@ int BspRenderer::refreshModel(int modelIdx, bool refreshClipnodes, bool triangul
 		}
 
 		bool isSpecial = texinfo.nFlags & TEX_SPECIAL;
+		bool isHiddenInOverview = tex && strcasecmp(tex->szName, "BLACK_HIDDEN") == 0;
 		bool hasLighting = face.nStyles[0] != 255 && face.nLightmapOffset >= 0 && !isSpecial;
 
 		for (int s = 0; s < MAX_LIGHTMAPS; s++)
@@ -1180,7 +1181,7 @@ int BspRenderer::refreshModel(int modelIdx, bool refreshClipnodes, bool triangul
 			if (texinfo.iMiptex <= -1 || texinfo.iMiptex >= map->textureCount)
 				continue;
 			bool textureMatch = !texturesLoaded || std::find(renderGroups[k].textures.begin(), renderGroups[k].textures.end(), glTextures[texinfo.iMiptex][0]) != renderGroups[k].textures.end();
-			if (textureMatch && renderGroups[k].transparent == isTransparent)
+			if (textureMatch && renderGroups[k].transparent == isTransparent && renderGroups[k].hiddenInOverview == isHiddenInOverview)
 			{
 				bool allMatch = true;
 				for (int s = 0; s < MAX_LIGHTMAPS; s++)
@@ -1205,6 +1206,7 @@ int BspRenderer::refreshModel(int modelIdx, bool refreshClipnodes, bool triangul
 			RenderGroup newGroup = RenderGroup();
 			newGroup.transparent = isTransparent;
 			newGroup.special = isSpecial;
+			newGroup.hiddenInOverview = isHiddenInOverview;
 			newGroup.textures = texturesLoaded && texinfo.iMiptex >= 0 && texinfo.iMiptex < map->textureCount ? glTextures[texinfo.iMiptex] : std::vector<Texture*>{ greyTex };
 			for (int s = 0; s < MAX_LIGHTMAPS; s++)
 			{
@@ -3109,6 +3111,9 @@ void BspRenderer::drawModel(RenderEnt* ent, int pass, bool highlight, bool edges
 
 	for (auto& rgroup : renderModels[modelIdx]->renderGroups)
 	{
+		if (ortho_overview && rgroup.hiddenInOverview)
+			continue;
+
 		if (rgroup.special)
 		{
 			if (ortho_overview | make_screenshot)
