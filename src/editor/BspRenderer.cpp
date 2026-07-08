@@ -3256,7 +3256,9 @@ void BspRenderer::drawPointEntities(std::vector<int> highlightEnts, int pass)
 
 		if (ortho_overview)
 		{
-			if (!ortho_render_studio_models || !renderEnts[i].mdl || !renderEnts[i].mdl->hasRenderableMeshes())
+			bool hasMapStudioModel = mapEnt->hasKey("model") && ends_with(toLowerCase(mapEnt->keyvalues["model"]), ".mdl");
+
+			if (!ortho_render_studio_models || !hasMapStudioModel || !renderEnts[i].mdl || !renderEnts[i].mdl->hasRenderableMeshes())
 			{
 				continue;
 			}
